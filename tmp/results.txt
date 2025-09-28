@@ -3,11 +3,11 @@ Serial: 0
 Parallel: 0
 --------
 Times for 100 vertices and 500 connections: 
-Serial: 0
+Serial: 1
 Parallel: 0
 --------
 Times for 1000 vertices and 5000 connections: 
-Serial: 1
+Serial: 0
 Parallel: 0
 --------
 Times for 10000 vertices and 50000 connections: 
