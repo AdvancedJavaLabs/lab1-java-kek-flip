@@ -42,19 +42,13 @@ class Graph {
         visited[startVertex].set(true);
         nextVertexes.add(startVertex);
 
-        Boolean hasVertextsToProcess = true;
-
-        while (hasVertextsToProcess) {
+        while (!nextVertexes.isEmpty()) {
             while (!nextVertexes.isEmpty()) {
                 balancer.add(nextVertexes.poll());
             }
 
-            hasVertextsToProcess = balancer.getQueues().stream()
+            balancer.getQueues().stream()
                     .map((queue) -> executor.submit(() -> {
-                        if (queue.isEmpty()) {
-                            return false;
-                        }
-
                         while (!queue.isEmpty()) {
                             Integer vertex = queue.poll();
 
@@ -65,16 +59,13 @@ class Graph {
                                 }
                             }
                         }
-
-                        return true;
-                    })).map((future) -> {
+                    })).forEach((future) -> {
                         try {
-                            return future.get();
+                            future.get();
                         } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
-                            return false;
                         }
-                    }).reduce(hasVertextsToProcess, (acc, futureResult) -> acc && futureResult);
+                    });
         }
     }
 
