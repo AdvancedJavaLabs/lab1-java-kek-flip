@@ -1,15 +1,15 @@
 package org.itmo;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 class Graph {
+    private final Integer CORES = 12;
     private final int V;
     private final ArrayList<Integer>[] adjList;
     private final ExecutorService executor;
@@ -21,7 +21,7 @@ class Graph {
             adjList[i] = new ArrayList<>();
         }
 
-        executor = Executors.newFixedThreadPool(12);
+        executor = Executors.newFixedThreadPool(CORES);
     }
 
     void addEdge(int src, int dest) {
@@ -35,19 +35,16 @@ class Graph {
         for (Integer i = 0; i < V; i++) {
             visited[i] = new AtomicBoolean(false);
         }
-
-        QueueBalancer<Integer> balancer = new QueueBalancer<>(12);
-        Queue<Integer> nextVertexes = new ConcurrentLinkedQueue<>();
-
         visited[startVertex].set(true);
-        nextVertexes.add(startVertex);
 
-        while (!nextVertexes.isEmpty()) {
-            while (!nextVertexes.isEmpty()) {
-                balancer.add(nextVertexes.poll());
-            }
+        CuncurrentQueueBalancer<Integer> balancer = new CuncurrentQueueBalancer<>(CORES);
+        balancer.add(startVertex);
 
-            balancer.getQueues().stream()
+        while (true) {
+            CuncurrentQueueBalancer<Integer> nextBalancer = new CuncurrentQueueBalancer<>(CORES);
+
+            List<Future<?>> futures = balancer.getQueues().stream()
+                    .filter((queue) -> !queue.isEmpty())
                     .map((queue) -> executor.submit(() -> {
                         while (!queue.isEmpty()) {
                             Integer vertex = queue.poll();
@@ -55,17 +52,25 @@ class Graph {
                             for (int n : adjList[vertex]) {
                                 Boolean isVisited = visited[n].getAndSet(true);
                                 if (!isVisited) {
-                                    nextVertexes.add(n);
+                                    nextBalancer.add(n);
                                 }
                             }
                         }
-                    })).forEach((future) -> {
-                        try {
-                            future.get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    })).collect(Collectors.toList());
+
+            if (futures.isEmpty()) {
+                break;
+            }
+
+            for (Future<?> f : futures) {
+                try {
+                    f.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            balancer = nextBalancer;
         }
     }
 
