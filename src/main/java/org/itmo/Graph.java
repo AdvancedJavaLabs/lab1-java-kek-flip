@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 class Graph {
-    private final Integer CORES = 12;
+    private final Integer CORES = Runtime.getRuntime().availableProcessors() * 2;
     private final int V;
     private final ArrayList<Integer>[] adjList;
     private final ExecutorService executor;
@@ -37,11 +37,11 @@ class Graph {
         }
         visited[startVertex].set(true);
 
-        CuncurrentQueueBalancer<Integer> balancer = new CuncurrentQueueBalancer<>(CORES);
+        ConcurrentQueueBalancer balancer = new ConcurrentQueueBalancer(CORES);
         balancer.add(startVertex);
 
         while (true) {
-            CuncurrentQueueBalancer<Integer> nextBalancer = new CuncurrentQueueBalancer<>(CORES);
+            ConcurrentQueueBalancer nextBalancer = new ConcurrentQueueBalancer(CORES);
 
             List<Future<?>> futures = balancer.getQueues().stream()
                     .filter((queue) -> !queue.isEmpty())

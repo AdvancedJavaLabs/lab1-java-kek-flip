@@ -1,5 +1,6 @@
 package org.itmo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -7,21 +8,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class CuncurrentQueueBalancer<T> {
+class ConcurrentQueueBalancer {
     private AtomicInteger nextQueue;
-    private final List<Queue<T>> queues;
+    private final List<Queue<Integer>> queues;
 
-    CuncurrentQueueBalancer(Integer size) {
+    ConcurrentQueueBalancer(int size) {
         nextQueue = new AtomicInteger(0);
-        queues = Stream.<Queue<T>>generate(ConcurrentLinkedQueue<T>::new).limit(size).collect(Collectors.toList());
+        queues = Stream.<Queue<Integer>>generate(ConcurrentLinkedQueue<Integer>::new).limit(size)
+                .collect(Collectors.toList());
     }
 
-    void add(T value) {
+    void add(Integer value) {
         Integer nextQueueIdx = nextQueue.getAndUpdate((val) -> (val + 1) % queues.size());
         queues.get(nextQueueIdx).add(value);
     }
 
-    List<Queue<T>> getQueues() {
+    List<Queue<Integer>> getQueues() {
         return queues;
     }
 }
