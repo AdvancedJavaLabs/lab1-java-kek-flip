@@ -44,3 +44,10 @@ tasks.register<JavaExec>("jcstress") {
     }
 }
 
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+
+    minHeapSize = "512m"
+    maxHeapSize = "8000m"
+}
+
