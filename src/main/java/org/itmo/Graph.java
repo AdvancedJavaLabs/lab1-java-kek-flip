@@ -24,6 +24,10 @@ class Graph {
         executor = Executors.newFixedThreadPool(CORES);
     }
 
+    List<Integer>[] getAdjList() {
+        return adjList;
+    }
+
     void addEdge(int src, int dest) {
         if (!adjList[src].contains(dest)) {
             adjList[src].add(dest);
