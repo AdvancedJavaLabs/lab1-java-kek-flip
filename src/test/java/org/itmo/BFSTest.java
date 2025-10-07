@@ -4,18 +4,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.Buffer;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
-import java.util.stream.IntStream;
 
 public class BFSTest {
 
     @Test
     public void bfsTest() throws IOException {
-        int[] sizes = new int[]{10, 100, 1000, 10_000, 10_000, 50_000, 100_000, 1_000_000, 2_000_000};
-        int[] connections = new int[]{50, 500, 5000, 50_000, 100_000, 1_000_000, 1_000_000, 10_000_000, 10_000_000};
+        int[] sizes = new int[] { 10, 100, 1000, 10_000, 10_000, 50_000, 100_000, 1_000_000, 2_000_000 };
+        int[] connections = new int[] { 50, 500, 5000, 50_000, 100_000, 1_000_000, 1_000_000, 10_000_000, 10_000_000 };
         Random r = new Random(42);
         try (FileWriter fw = new FileWriter("tmp/results.txt")) {
             for (int i = 0; i < sizes.length; i++) {
@@ -33,7 +30,6 @@ public class BFSTest {
             fw.flush();
         }
     }
-
 
     private long executeSerialBfsAndGetTime(Graph g) {
         long startTime = System.currentTimeMillis();
